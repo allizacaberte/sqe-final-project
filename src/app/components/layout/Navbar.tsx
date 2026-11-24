@@ -3,16 +3,19 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Search, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import Image from "next/image";
 import { logout } from "@/lib/auth";
+import SearchBox from "@/app/components/layout/SearchBox";
 
 interface NavbarProps {
   isLoggedIn?: boolean;
+  searchQuery?: string; // pre-fills the search box on the /search page
 }
 
 export default function Navbar({
   isLoggedIn = false,
+  searchQuery = "",
 }: NavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -29,14 +32,8 @@ export default function Navbar({
           />
         </Link>
 
-        <div className="navbar-search">
-          <input
-            type="text"
-            placeholder="Search..."
-            aria-label="Search movies"
-          />
-          <Search size={16} />
-        </div>
+        {/* key resets the box when the page's search query changes (e.g. after a new search) */}
+        <SearchBox key={searchQuery} initialQuery={searchQuery} className="navbar-search-desktop" />
 
         <div className="navbar-right">
         <nav className="navbar-links">
@@ -85,6 +82,13 @@ export default function Navbar({
       {/* Mobile Navigation */}
       {isMenuOpen && (
         <nav className="navbar-mobile">
+          <SearchBox
+            key={searchQuery}
+            initialQuery={searchQuery}
+            className="navbar-mobile-search"
+            onNavigate={() => setIsMenuOpen(false)}
+          />
+
           <Link href="/" onClick={() => setIsMenuOpen(false)}>
             Home
           </Link>
@@ -93,9 +97,6 @@ export default function Navbar({
             <>
               <Link href="/dashboard" onClick={() => setIsMenuOpen(false)}>
                 My Reviews
-              </Link>
-              <Link href="/profile" onClick={() => setIsMenuOpen(false)}>
-                Profile
               </Link>
               <form action={logout}>
                 <button type="submit" className="navbar-mobile-logout">

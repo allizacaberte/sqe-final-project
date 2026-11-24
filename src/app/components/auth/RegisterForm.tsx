@@ -3,11 +3,13 @@
 import { useActionState } from "react";
 import { register } from "@/lib/auth";
 
-export default function RegisterForm() {
+// `next` = the page to return to after signing up (e.g. the movie you wanted to review)
+export default function RegisterForm({ next }: { next?: string }) {
   const [state, action, pending] = useActionState(register, undefined);
 
   return (
     <form action={action} className="auth-form">
+      {next && <input type="hidden" name="next" value={next} />}
       <label>
         Username
         <input type="text" name="name" placeholder="Your Username" required />

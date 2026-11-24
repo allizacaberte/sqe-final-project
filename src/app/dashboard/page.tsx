@@ -4,19 +4,20 @@ import { BookOpenText, Star } from "lucide-react";
 import Navbar from "@/app/components/layout/Navbar";
 import Footer from "@/app/components/layout/Footer";
 import { redirect } from "next/navigation";
-import { movies } from "@/app/data/movies";
 import { getCurrentUser } from "@/lib/session";
+import { prisma } from "@/lib/prisma";
+import { posterUrl } from "@/lib/tmdb";
+import { deleteReview } from "@/lib/reviews";
 
 export default async function DashboardPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
-  const journal = [movies[0], movies[2], movies[1]];
-  const comments = [
-    "An unforgettable story with beautiful animation and heart.",
-    "A bold, ambitious journey that stays with you long after the credits.",
-    "A charming and memorable adventure with a strong, inspiring lead.",
-  ];
+  const reviews = await prisma.review.findMany({
+    where: { userId: user.id },
+    include: { movie: true },
+    orderBy: { updatedAt: "desc" },
+  });
 
   return (
     <div className="site-shell">
@@ -29,12 +30,18 @@ export default async function DashboardPage() {
           </div>
 
           <div className="journal-list">
-            {journal.map((movie, index) => (
-              <article className="journal-entry" key={movie.id}>
+            {reviews.length === 0 && (
+              <p className="journal-empty">
+                You haven&apos;t reviewed anything yet. <Link href="/">Find a movie</Link>
+              </p>
+            )}
+
+            {reviews.map((review) => (
+              <article className="journal-entry" key={review.id}>
                 <div className="journal-entry-poster">
                   <Image
-                    src={movie.poster}
-                    alt={`${movie.title} poster`}
+                    src={posterUrl(review.movie.posterPath, "w342")}
+                    alt={`${review.movie.title} poster`}
                     fill
                     sizes="145px"
                   />
@@ -42,20 +49,24 @@ export default async function DashboardPage() {
 
                 <div className="journal-entry-body">
                   <div className="journal-entry-top">
-                    <h2>{movie.title}</h2>
+                    <h2>
+                      <Link href={`/movies/${review.movie.tmdbId}`}>{review.movie.title}</Link>
+                    </h2>
                     <div className="journal-rating">
                       <Star size={28} fill="currentColor" />
-                      <span>{Math.round(movie.rating)}/10</span>
+                      <span>{review.rating}/10</span>
                     </div>
                   </div>
 
-                  <p>{comments[index]}</p>
+                  <p>{review.body}</p>
 
                   <div className="journal-entry-footer">
-                    <Link
-                      href={`/reviews/${movie.id}`}
-                      className="journal-edit"
-                    >
+                    <form action={deleteReview.bind(null, review.id)}>
+                      <button type="submit" className="journal-delete">
+                        Delete
+                      </button>
+                    </form>
+                    <Link href={`/reviews/${review.movie.tmdbId}`} className="journal-edit">
                       Edit
                     </Link>
                   </div>

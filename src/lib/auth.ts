@@ -4,6 +4,15 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { createSession, deleteSession } from "@/lib/session";
 
+// Where to go after login/register. Only allows paths on this site ("/movies/1"),
+// never another website ("//evil.com" or "https://..."), to avoid open redirects.
+function safeNext(value: FormDataEntryValue | null) {
+  const next = typeof value === "string" ? value : "";
+  return next.startsWith("/") && !next.startsWith("//") && !next.startsWith("/\\")
+    ? next
+    : "/dashboard";
+}
+
 export async function register(_prev: unknown, formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
   const email = String(formData.get("email") ?? "")
@@ -21,7 +30,7 @@ export async function register(_prev: unknown, formData: FormData) {
     data: { name, email, passwordHash: await bcrypt.hash(password, 10) },
   });
   await createSession(user.id);
-  redirect("/dashboard");
+  redirect(safeNext(formData.get("next")));
 }
 
 export async function login(_prev: unknown, formData: FormData) {
@@ -33,7 +42,7 @@ export async function login(_prev: unknown, formData: FormData) {
   if (!user || !(await bcrypt.compare(password, user.passwordHash)))
     return { error: "Wrong email or password." };
   await createSession(user.id);
-  redirect("/dashboard");
+  redirect(safeNext(formData.get("next")));
 }
 
 export async function logout() {

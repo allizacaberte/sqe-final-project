@@ -3,11 +3,13 @@
 import { useActionState } from "react";
 import { login } from "@/lib/auth";
 
-export default function LoginForm() {
+// `next` = the page to return to after logging in (e.g. the movie you wanted to review)
+export default function LoginForm({ next }: { next?: string }) {
   const [state, action, pending] = useActionState(login, undefined);
 
   return (
     <form action={action} className="auth-form">
+      {next && <input type="hidden" name="next" value={next} />}
       <label>
         Email
         <input type="email" name="email" placeholder="you@example.com" required />

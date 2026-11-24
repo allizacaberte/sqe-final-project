@@ -17,7 +17,17 @@ export default function Footer() {
           />
         </Link>
         <div className="footer-divider" />
-        <p>© {new Date().getFullYear()} Critic's Frame. All rights reserved.</p>
+        <p>
+          © {new Date().getFullYear()} Critic&apos;s Frame. All rights reserved.
+          <br />
+          <span className="footer-credit">
+            Movie data from{" "}
+            <a href="https://www.themoviedb.org" target="_blank" rel="noopener noreferrer">
+              TMDB
+            </a>
+            . This product uses the TMDB API but is not endorsed or certified by TMDB.
+          </span>
+        </p>
         <a href="#top" className="back-to-top" aria-label="Back to top">
           <ChevronUp size={22} />
         </a>

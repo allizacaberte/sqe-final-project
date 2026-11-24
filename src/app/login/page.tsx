@@ -5,9 +5,18 @@ import Navbar from "@/app/components/layout/Navbar";
 import LoginForm from "@/app/components/auth/LoginForm";
 import { getCurrentUser } from "@/lib/session";
 
-export default async function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
   // Already logged in? Skip the form.
   if (await getCurrentUser()) redirect("/dashboard");
+
+  // e.g. /login?next=/reviews/862 when someone clicked "Add Review" while logged out
+  const { next } = await searchParams;
+  const nextPath = typeof next === "string" ? next : undefined;
+  const registerHref = nextPath ? `/register?next=${encodeURIComponent(nextPath)}` : "/register";
 
   return (
     <main className="auth-page">
@@ -25,9 +34,9 @@ export default async function LoginPage() {
       <section className="auth-panel">
         <h1>Welcome back</h1>
         <p>Sign in to continue to your movie journal.</p>
-        <LoginForm />
+        <LoginForm next={nextPath} />
         <p className="auth-switch">
-          Don't have an account? <Link href="/register">Sign up</Link>
+          Don&apos;t have an account? <Link href={registerHref}>Sign up</Link>
         </p>
       </section>
     </main>
