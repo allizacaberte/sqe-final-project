@@ -3,9 +3,14 @@ import Link from "next/link";
 import { BookOpenText, Star } from "lucide-react";
 import Navbar from "@/app/components/layout/Navbar";
 import Footer from "@/app/components/layout/Footer";
+import { redirect } from "next/navigation";
 import { movies } from "@/app/data/movies";
+import { getCurrentUser } from "@/lib/session";
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const user = await getCurrentUser();
+  if (!user) redirect("/login");
+
   const journal = [movies[0], movies[2], movies[1]];
   const comments = [
     "An unforgettable story with beautiful animation and heart.",
@@ -15,7 +20,7 @@ export default function DashboardPage() {
 
   return (
     <div className="site-shell">
-      <Navbar isLoggedIn />
+      <Navbar isLoggedIn={!!user} />
       <main className="journal-page">
         <div className="container">
           <div className="journal-header">

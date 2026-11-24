@@ -1,8 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import Navbar from "@/app/components/layout/Navbar";
+import LoginForm from "@/app/components/auth/LoginForm";
+import { getCurrentUser } from "@/lib/session";
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  // Already logged in? Skip the form.
+  if (await getCurrentUser()) redirect("/dashboard");
+
   return (
     <main className="auth-page">
       <Navbar />
@@ -19,19 +25,7 @@ export default function LoginPage() {
       <section className="auth-panel">
         <h1>Welcome back</h1>
         <p>Sign in to continue to your movie journal.</p>
-        <form className="auth-form">
-          <label>
-            Email
-            <input type="email" name="email" placeholder="you@example.com" required />
-          </label>
-          <label>
-            Password
-            <input type="password" name="password" placeholder="Enter your password" required />
-          </label>
-          <Link href="/dashboard" className="btn-primary auth-submit">
-            Login
-          </Link>
-        </form>
+        <LoginForm />
         <p className="auth-switch">
           Don't have an account? <Link href="/register">Sign up</Link>
         </p>

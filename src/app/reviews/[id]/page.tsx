@@ -3,15 +3,21 @@ import Link from "next/link";
 import { Star } from "lucide-react";
 import Navbar from "@/app/components/layout/Navbar";
 import Footer from "@/app/components/layout/Footer";
+import { redirect } from "next/navigation";
 import { movies } from "@/app/data/movies";
+import { getCurrentUser } from "@/lib/session";
 
 export default async function ReviewPage({ params }: { params: Promise<{ id: string }> }) {
+  // Writing a review needs an account.
+  const user = await getCurrentUser();
+  if (!user) redirect("/login");
+
   const { id } = await params;
   const movie = movies.find((item) => item.id === Number(id)) ?? movies[0];
 
   return (
     <div className="site-shell">
-      <Navbar isLoggedIn />
+      <Navbar isLoggedIn={!!user} />
       <main className="review-page">
         <div className="container review-layout">
           <div className="review-poster"><Image src={movie.poster} alt={`${movie.title} poster`} fill sizes="430px" priority /></div>

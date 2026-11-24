@@ -11,13 +11,15 @@ import {
   recentlyAddedMovies,
   topPickMovies,
 } from "@/app/data/movies";
+import { getCurrentUser } from "@/lib/session";
 
-export default function Home() {
+export default async function Home() {
+  const user = await getCurrentUser();
   const featuredMovie = recentlyAddedMovies[0];
 
   return (
     <div className="site-shell">
-      <Navbar />
+      <Navbar isLoggedIn={!!user} />
       <main className="landing-main">
         <section className="hero-section">
           <Image

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Search, Menu, X } from "lucide-react";
 import Image from "next/image";
+import { logout } from "@/lib/auth";
 
 interface NavbarProps {
   isLoggedIn?: boolean;
@@ -37,6 +38,7 @@ export default function Navbar({
           <Search size={16} />
         </div>
 
+        <div className="navbar-right">
         <nav className="navbar-links">
           <Link href="/" className="navbar-link">
             Home
@@ -50,12 +52,11 @@ export default function Navbar({
 
         <div className="navbar-actions">
           {isLoggedIn ? (
-            <>
-
-              <button className="btn-primary">
+            <form action={logout}>
+              <button type="submit" className="btn-primary">
                 Logout
               </button>
-            </>
+            </form>
           ) : (
             <>
               <Link href="/login" className="navbar-link">
@@ -67,6 +68,7 @@ export default function Navbar({
               </Link>
             </>
           )}
+        </div>
         </div>
 
         {/* Mobile Menu Button */}
@@ -95,6 +97,11 @@ export default function Navbar({
               <Link href="/profile" onClick={() => setIsMenuOpen(false)}>
                 Profile
               </Link>
+              <form action={logout}>
+                <button type="submit" className="navbar-mobile-logout">
+                  Logout
+                </button>
+              </form>
             </>
           ) : (
             <>

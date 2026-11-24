@@ -50,10 +50,12 @@ main { flex: 1; }
   height: 100%;
   margin-inline: auto;
   display: grid;
-  grid-template-columns: 150px 210px 1fr auto;
+  grid-template-columns: 150px 210px 1fr;
   align-items: center;
   gap: 24px;
 }
+/* Groups the nav links + login/signup buttons so they move as one unit */
+.navbar-right { justify-self: end; display: flex; align-items: center; gap: 24px; }
 .navbar-brand { width: 112px; }
 .navbar-brand-image, .footer-logo { width: 112px; height: auto; }
 .navbar-search {
@@ -79,7 +81,6 @@ main { flex: 1; }
 }
 .navbar-search input::placeholder { color: #a99d91; }
 .navbar-links, .navbar-actions { display: flex; align-items: center; gap: 28px; }
-.navbar-links { justify-self: end; }
 .navbar-link { color: var(--beige); font-size: 16px; transition: color .2s; }
 .navbar-link:hover { color: var(--gold); }
 .navbar-actions { gap: 18px; }
@@ -429,6 +430,19 @@ main { flex: 1; }
   z-index: 40; /* Keeps navbar visible over both the theater image and the dark panel */
 }
 
+/* On login/register, stretch the navbar to the screen edge and make its last
+   column exactly as wide as the maroon panel (540px), so
+   Home / Login / Sign Up sit centered above the form. */
+@media (min-width: 901px) {
+  .auth-page .navbar-container {
+    width: auto;
+    margin-inline: 64px 0;
+    grid-template-columns: 150px 1fr 540px;
+  }
+  .auth-page .navbar-search { width: min(500px, 100%); }
+  .auth-page .navbar-right { justify-self: center; }
+}
+
 .auth-visual {
   position: relative;
   min-height: 100vh;
@@ -472,6 +486,16 @@ main { flex: 1; }
 }
 .auth-form input:focus { border-color: var(--gold); }
 .auth-submit { width: 100%; height: 48px; margin-top: 8px; }
+.auth-submit:disabled { opacity: .7; cursor: wait; transform: none; }
+.auth-error {
+  margin: 0;
+  padding: 10px 14px;
+  border: 1px solid #a3262d;
+  border-radius: 5px;
+  background: rgba(163, 38, 45, .18);
+  color: #ffb4b4;
+  font-size: 14px;
+}
 .auth-switch { margin-top: 20px; text-align: center; color: #cbb69f; font-size: 14px; }
 .auth-switch a { color: var(--gold); text-decoration: underline; }
 
@@ -714,8 +738,7 @@ main { flex: 1; }
   .landing-section { width: min(calc(100% - 40px), var(--content)); }
   .navbar-container { width: calc(100% - 40px); grid-template-columns: 112px 1fr auto; }
   .navbar-search { display: none; }
-  .navbar-links { display: none; }
-  .navbar-actions { display: none; }
+  .navbar-right { display: none; }
   .navbar-menu-button { display: grid; place-items: center; background: transparent; border: 0; color: var(--beige); }
   .navbar-mobile {
     position: absolute;
@@ -727,6 +750,13 @@ main { flex: 1; }
     gap: 16px;
     padding: 20px;
     background: #260604;
+  }
+  .navbar-mobile-logout {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    text-align: left;
   }
   .hero-section { height: 85vh; min-height: 520px; }
   .featured-movie { grid-template-columns: 280px 1fr; }
