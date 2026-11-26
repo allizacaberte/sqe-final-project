@@ -1,6 +1,12 @@
-node_modules
+**/node_modules
 .git
 coverage
+dist
+out
+
 *.log
+*.log.*
 .env
 .env.*
+
+.next/cache
