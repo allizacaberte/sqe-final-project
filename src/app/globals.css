@@ -50,15 +50,17 @@ main { flex: 1; }
   height: 100%;
   margin-inline: auto;
   display: grid;
-  grid-template-columns: 150px 210px 1fr auto;
+  grid-template-columns: 150px minmax(0, 1fr) auto; /* logo | search (shrinks if needed) | links */
   align-items: center;
   gap: 24px;
 }
+/* Groups the nav links + login/signup buttons so they move as one unit */
+.navbar-right { justify-self: end; display: flex; align-items: center; gap: 24px; }
 .navbar-brand { width: 112px; }
 .navbar-brand-image, .footer-logo { width: 112px; height: auto; }
 .navbar-search {
   justify-self: start;
-  width: 500px;
+  width: min(500px, 100%); /* never wider than its column, so it can't cover the links */
   height: 38px;
   display: flex;
   align-items: center;
@@ -78,8 +80,74 @@ main { flex: 1; }
   font-size: 14px;
 }
 .navbar-search input::placeholder { color: #a99d91; }
+.navbar-search-button {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+}
+.navbar-search-button:hover { color: var(--gold); }
+
+/* Search box wrapper: holds the input + the autocomplete dropdown */
+.search-box {
+  position: relative;
+  justify-self: start;
+  width: min(500px, 100%);
+}
+.search-box .navbar-search { width: 100%; }
+
+/* Autocomplete dropdown */
+.search-suggestions {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 50;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  border: 1px solid #5a1a1d;
+  border-radius: 8px;
+  background: #160707;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, .55);
+}
+.search-suggestions a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  color: var(--cream);
+  font-size: 14px;
+}
+.search-suggestions li.is-active a { background: rgba(154, 13, 20, .45); }
+.search-suggestion-poster {
+  position: relative;
+  flex: 0 0 32px;
+  height: 48px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #2a0c0c;
+}
+.search-suggestion-poster img { object-fit: cover; }
+.search-suggestion-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.search-suggestion-year { color: #a99d91; font-size: 13px; }
+.search-suggestions-all {
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid #3a1214;
+}
+.search-suggestions-all a { color: var(--gold); justify-content: center; }
+.search-suggestions-all a:hover { background: rgba(154, 13, 20, .3); }
 .navbar-links, .navbar-actions { display: flex; align-items: center; gap: 28px; }
-.navbar-links { justify-self: end; }
 .navbar-link { color: var(--beige); font-size: 16px; transition: color .2s; }
 .navbar-link:hover { color: var(--gold); }
 .navbar-actions { gap: 18px; }
@@ -429,6 +497,18 @@ main { flex: 1; }
   z-index: 40; /* Keeps navbar visible over both the theater image and the dark panel */
 }
 
+/* On login/register, stretch the navbar to the screen edge and make its last
+   column exactly as wide as the maroon panel (540px), so
+   Home / Login / Sign Up sit centered above the form. */
+@media (min-width: 901px) {
+  .auth-page .navbar-container {
+    width: auto;
+    margin-inline: 64px 0;
+    grid-template-columns: 150px 1fr 540px;
+  }
+  .auth-page .navbar-right { justify-self: center; }
+}
+
 .auth-visual {
   position: relative;
   min-height: 100vh;
@@ -472,6 +552,16 @@ main { flex: 1; }
 }
 .auth-form input:focus { border-color: var(--gold); }
 .auth-submit { width: 100%; height: 48px; margin-top: 8px; }
+.auth-submit:disabled { opacity: .7; cursor: wait; transform: none; }
+.auth-error {
+  margin: 0;
+  padding: 10px 14px;
+  border: 1px solid #a3262d;
+  border-radius: 5px;
+  background: rgba(163, 38, 45, .18);
+  color: #ffb4b4;
+  font-size: 14px;
+}
 .auth-switch { margin-top: 20px; text-align: center; color: #cbb69f; font-size: 14px; }
 .auth-switch a { color: var(--gold); text-decoration: underline; }
 
@@ -709,13 +799,166 @@ main { flex: 1; }
 .review-actions .btn-primary:hover {
   background: #a51119;
 }
+.review-actions .btn-primary:disabled { opacity: .7; cursor: wait; }
+
+/* Movie titles that link to the movie page keep the heading's look */
+.movie-card-content h3 a,
+.featured-title-row h3 a,
+.journal-entry h2 a { color: inherit; }
+.movie-card-content h3 a:hover,
+.featured-title-row h3 a:hover,
+.journal-entry h2 a:hover { color: var(--gold); }
+
+/* Review form (write / edit page) */
+.review-form { display: flex; flex-direction: column; flex: 1; gap: 12px; }
+.review-rating-select {
+  border: 0;
+  background: transparent;
+  color: var(--cream);
+  font: inherit;
+  cursor: pointer;
+}
+.review-rating-select option { background: #210707; font-size: 16px; }
+
+/* Public movie page: list of everyone's reviews */
+.movie-reviews { margin-top: 56px; display: flex; flex-direction: column; gap: 16px; }
+.movie-reviews h2 { margin: 0 0 8px; color: var(--cream); font-size: 28px; }
+.movie-reviews-empty { margin: 0; color: #cbb69f; }
+.movie-review {
+  padding: 20px 24px;
+  border: 1px solid #5a1a1d;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, .25);
+}
+.movie-review header { display: flex; justify-content: space-between; align-items: center; color: var(--cream); }
+.movie-review-rating { display: inline-flex; align-items: center; gap: 6px; color: var(--gold); }
+.movie-review p { margin: 10px 0; color: #e6d8c5; line-height: 1.55; white-space: pre-line; }
+.movie-review time { color: #a99d91; font-size: 13px; }
+
+/* Dashboard: delete button + empty state */
+.journal-entry-footer { gap: 12px; }
+.journal-delete {
+  min-height: 36px;
+  padding: 7px 22px;
+  border: 1px solid #9a0d14;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--cream);
+  font-size: 14px;
+}
+.journal-delete:hover { background: rgba(154, 13, 20, .3); }
+.journal-empty { margin: 0; color: #cbb69f; }
+.journal-empty a { color: var(--gold); text-decoration: underline; }
+
+/* Search results page */
+.search-page {
+  min-height: calc(100vh - 110px);
+  padding: calc(var(--nav-height) + 42px) 0 90px;
+  background: var(--wine);
+}
+.search-heading { margin: 0 0 8px; color: var(--cream); font-size: 32px; }
+.search-heading span { color: var(--gold); }
+.search-empty { color: #cbb69f; }
+
+/* TMDB credit in the footer (required by TMDB's terms) */
+.footer-credit { color: #a99d91; font-size: 12px; }
+.footer-credit a { color: var(--gold); text-decoration: underline; }
+
+/* "(3 reviews)" next to a card's star rating */
+.movie-card-count { color: #a99d91; font-size: 13px; }
+
+/* ---------- Home page sections ---------- */
+.section-subtitle { margin: -16px 0 24px; color: #cbb69f; font-size: 15px; }
+.section-empty { margin: 0; color: #cbb69f; }
+.section-empty a { color: var(--gold); text-decoration: underline; }
+
+/* Horizontal scrolling row of smaller movie cards */
+.movie-rail {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 210px;
+  gap: 20px;
+  overflow-x: auto;
+  padding: 4px 2px 16px;
+  scroll-snap-type: x mandatory;
+  scrollbar-color: #5a1a1d transparent;
+}
+.movie-rail-item { display: flex; scroll-snap-align: start; }
+.movie-rail .movie-card { width: 100%; }
+.movie-rail .movie-card-poster { height: 300px; }
+.movie-rail .movie-card-content { padding: 12px 14px 14px; }
+.movie-rail .movie-card-rating span { font-size: 16px; }
+.movie-rail .movie-card-rating svg { width: 18px; height: 18px; }
+.movie-rail .movie-card-content h3 { margin: 2px 0 10px; font-size: 18px; }
+.movie-rail .movie-card-footer { flex-direction: column; align-items: flex-start; }
+.movie-rail .movie-card-footer .btn-primary { min-height: 32px; padding: 6px 14px; font-size: 13px; }
+
+/* Latest Reviews feed */
+.review-feed { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.review-feed-item {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid #5a1a1d;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, .25);
+}
+.review-feed-poster {
+  position: relative;
+  flex: 0 0 72px;
+  height: 108px;
+  overflow: hidden;
+  border-radius: 6px;
+  background: #220505;
+}
+.review-feed-poster img { object-fit: cover; }
+.review-feed-body { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.review-feed-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.review-feed-title { color: var(--cream); font-size: 18px; }
+.review-feed-title span { color: #a99d91; font-size: 14px; }
+.review-feed-title:hover { color: var(--gold); }
+.review-feed-text {
+  display: -webkit-box;
+  margin: 8px 0;
+  overflow: hidden;
+  color: #e6d8c5;
+  line-height: 1.5;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+.review-feed-meta { margin: auto 0 0; color: #a99d91; font-size: 13px; }
+
+/* Genre buttons */
+.genre-chips { display: flex; flex-wrap: wrap; gap: 10px; }
+.genre-chip {
+  padding: 7px 16px;
+  border: 1px solid #7a2a2e;
+  border-radius: 999px;
+  color: var(--cream);
+  font-size: 14px;
+  transition: background .2s, border-color .2s;
+}
+.genre-chip:hover { border-color: var(--gold); background: rgba(154, 13, 20, .3); }
+.genre-chip.is-active { border-color: var(--gold); background: #9a0d14; }
+.search-page .genre-chips { margin: 20px 0 8px; }
+.genre-grid { margin-top: 32px; }
+
+/* Featured movie genres line */
+.featured-movie-genres { margin: 10px 0 0; color: #cc9a76; font-size: 14px; }
+
+/* Movie page facts: release date, director, genres */
+.movie-facts { display: flex; flex-direction: column; gap: 14px; margin: 20px 0 0; }
+.movie-facts div { display: grid; grid-template-columns: 120px 1fr; align-items: start; gap: 12px; }
+.movie-facts dt { padding-top: 2px; color: #a99d91; font-size: 14px; }
+.movie-facts dd { margin: 0; color: var(--cream); font-size: 17px; }
+.movie-facts .genre-chip { padding: 4px 12px; font-size: 13px; }
+
 @media (max-width: 900px) {
   .container,
   .landing-section { width: min(calc(100% - 40px), var(--content)); }
   .navbar-container { width: calc(100% - 40px); grid-template-columns: 112px 1fr auto; }
-  .navbar-search { display: none; }
-  .navbar-links { display: none; }
-  .navbar-actions { display: none; }
+  .navbar-search-desktop { display: none; }
+  .navbar-right { display: none; }
   .navbar-menu-button { display: grid; place-items: center; background: transparent; border: 0; color: var(--beige); }
   .navbar-mobile {
     position: absolute;
@@ -728,6 +971,15 @@ main { flex: 1; }
     padding: 20px;
     background: #260604;
   }
+  .navbar-mobile-logout {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+  }
+  /* The desktop search is hidden on small screens; this one lives in the menu */
+  .navbar-mobile .navbar-mobile-search { width: 100%; }
   .hero-section { height: 85vh; min-height: 520px; }
   .featured-movie { grid-template-columns: 280px 1fr; }
   .featured-movie-poster { width: 280px; height: 350px; }
@@ -754,6 +1006,10 @@ main { flex: 1; }
   .featured-movie-bottom { margin-top: 30px; }
   .top-picks-grid { grid-template-columns: 1fr; gap: 34px; }
   .movie-card-poster { height: 420px; }
+  .movie-rail { grid-auto-columns: 170px; gap: 14px; }
+  .movie-rail .movie-card-poster { height: 250px; }
+  .review-feed { grid-template-columns: 1fr; }
+  .movie-facts div { grid-template-columns: 1fr; gap: 4px; }
   .footer { height: 90px; }
   .footer-inner { width: calc(100% - 32px); }
   .footer-divider { height: 48px; }

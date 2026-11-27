@@ -1,8 +1,22 @@
 import Image from "next/image";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import Navbar from "@/app/components/layout/Navbar";
+import RegisterForm from "@/app/components/auth/RegisterForm";
+import { getCurrentUser } from "@/lib/session";
 
-export default function RegisterPage() {
+export default async function RegisterPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  // Already logged in? Skip the form.
+  if (await getCurrentUser()) redirect("/dashboard");
+
+  const { next } = await searchParams;
+  const nextPath = typeof next === "string" ? next : undefined;
+  const loginHref = nextPath ? `/login?next=${encodeURIComponent(nextPath)}` : "/login";
+
   return (
     <main className="auth-page">
       <Navbar />
@@ -19,25 +33,9 @@ export default function RegisterPage() {
       <section className="auth-panel">
         <h1>Create account</h1>
         <p>Join a community of film enthusiasts.</p>
-        <form className="auth-form">
-          <label>
-            Name
-            <input type="text" name="name" placeholder="Your name" required />
-          </label>
-          <label>
-            Email
-            <input type="email" name="email" placeholder="you@example.com" required />
-          </label>
-          <label>
-            Password
-            <input type="password" name="password" placeholder="Create a password" required />
-          </label>
-          <Link href="/dashboard" className="btn-primary auth-submit">
-            Sign Up
-          </Link>
-        </form>
+        <RegisterForm next={nextPath} />
         <p className="auth-switch">
-          Already have an account? <Link href="/login">Login</Link>
+          Already have an account? <Link href={loginHref}>Login</Link>
         </p>
       </section>
     </main>

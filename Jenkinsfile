@@ -5,6 +5,11 @@ pipeline {
         nodejs 'NodeJS-24'
     }
 
+    environment {
+        DATABASE_URL = 'postgresql://placeholder:placeholder@127.0.0.1:5432/placeholder'
+        TMDB_READ_TOKEN = 'placeholder'
+    }
+
     options {
         skipDefaultCheckout(true)
         timestamps()
@@ -14,6 +19,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
+                deleteDir()
                 checkout scm
                 echo "Current branch: ${env.BRANCH_NAME}"
             }
@@ -24,6 +30,7 @@ pipeline {
                 sh 'node --version'
                 sh 'npm --version'
                 sh 'npm ci'
+                sh 'npx prisma generate'
                 sh 'npm test'
             }
         }
@@ -65,38 +72,52 @@ pipeline {
         }
 
         stage('Archive Artifact') {
-        when {
-            branch 'main'
+            when {
+                branch 'main'
+            }
+
+            steps {
+                sh '''
+                    rm -rf artifact
+                    mkdir -p artifact/.next/standalone
+                    mkdir -p artifact/.next/static
+
+                    tar --exclude=node_modules \
+                        --exclude=.env \
+                        --exclude='.env.*' \
+                        -C .next/standalone -cf - . \
+                        | tar -C artifact/.next/standalone -xf -
+
+                    cp -r .next/static/. artifact/.next/static/
+                    cp -r public artifact/
+                    cp package.json package-lock.json artifact/
+                    cp Dockerfile .dockerignore artifact/
+
+                    test -f artifact/.next/standalone/server.js
+
+                    # Verify that no environment files are included
+                    if find artifact -name '.env*' | grep -q .; then
+                        echo "ERROR: Environment file detected in artifact."
+                        exit 1
+                    fi
+
+                    # Verify that no node_modules directories are included
+                    if find artifact -name 'node_modules' | grep -q .; then
+                        echo "ERROR: node_modules detected in artifact."
+                        exit 1
+                    fi
+
+                    echo "Artifact security verification passed."
+
+                    tar -czf critics-frame-${BUILD_NUMBER}.tar.gz -C artifact .
+                '''
+
+                archiveArtifacts(
+                    artifacts: "critics-frame-${env.BUILD_NUMBER}.tar.gz",
+                    fingerprint: true
+                )
+            }
         }
-
-        steps {
-            sh '''
-                rm -rf artifact
-                mkdir -p artifact/.next/standalone
-                mkdir -p artifact/.next/static
-
-                tar --exclude=node_modules \
-                    --exclude=.env \
-                    --exclude='.env.*' \
-                    -C .next/standalone -cf - . \
-                    | tar -C artifact/.next/standalone -xf -
-
-                cp -r .next/static/. artifact/.next/static/
-                cp -r public artifact/
-                cp package.json package-lock.json artifact/
-                cp Dockerfile .dockerignore artifact/
-
-                test -f artifact/.next/standalone/server.js
-
-                tar -czf critics-frame-${BUILD_NUMBER}.tar.gz -C artifact .
-            '''
-
-            archiveArtifacts(
-                artifacts: "critics-frame-${env.BUILD_NUMBER}.tar.gz",
-                fingerprint: true
-            )
-        }
-    }
     }
 
     post {

@@ -1,11 +1,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import type { Movie } from "@/app/data/movies";
 import { Star } from "lucide-react";
+import { formatMeta } from "@/lib/tmdb";
+import { formatRating, type RatedMovie } from "@/lib/ratings";
 
 interface MovieCardProps {
-  movie: Movie;
+  movie: RatedMovie;
 }
 
 export default function MovieCard({ movie }: MovieCardProps) {
@@ -24,13 +25,18 @@ export default function MovieCard({ movie }: MovieCardProps) {
       <div className="movie-card-content">
         <p className="movie-card-rating">
           <Star size={20} fill="currentColor" />
-          <span>{movie.rating.toFixed(1)}/10</span>
+          <span>{formatRating(movie.rating)}</span>
+          {movie.reviewCount > 0 && (
+            <small className="movie-card-count">
+              ({movie.reviewCount} {movie.reviewCount === 1 ? "review" : "reviews"})
+            </small>
+          )}
         </p>
-        <h3>{movie.title}</h3>
+        <h3>
+          <Link href={`/movies/${movie.id}`}>{movie.title}</Link>
+        </h3>
         <div className="movie-card-footer">
-          <p className="movie-card-meta">
-            {movie.year} <span>•</span> {movie.ageRating} <span>•</span> {movie.duration}
-          </p>
+          <p className="movie-card-meta">{formatMeta(movie)}</p>
           <Link href={`/reviews/${movie.id}`} className="btn-primary btn-small">
             Add Review
           </Link>
