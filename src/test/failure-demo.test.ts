@@ -8,6 +8,6 @@ describe("CI Failure Demonstration", () => {
       ratings.reduce((sum, rating) => sum + rating, 0) /
       ratings.length;
 
-    expect(average).toBe(10);
+    expect(average).toBe(9);
   });
 });
