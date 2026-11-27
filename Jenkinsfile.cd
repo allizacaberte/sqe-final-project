@@ -1,0 +1,147 @@
+pipeline {
+    agent any
+
+    parameters {
+        string(
+            name: 'CI_BUILD_NUMBER',
+            defaultValue: '2',
+            description: 'Successful main CI build number to deploy'
+        )
+
+        choice(
+            name: 'ENVIRONMENT',
+            choices: ['DEV', 'TEST', 'ACC', 'PROD'],
+            description: 'Target deployment environment'
+        )
+    }
+
+    options {
+        skipDefaultCheckout(true)
+        timestamps()
+        disableConcurrentBuilds()
+    }
+
+    stages {
+        stage('Validate Parameters') {
+            steps {
+                script {
+                    if (!(params.CI_BUILD_NUMBER ==~ /[1-9][0-9]*/)) {
+                        error('Invalid CI build number.')
+                    }
+
+                    def ports = [
+                        DEV: '8101',
+                        TEST: '8102',
+                        ACC: '8103',
+                        PROD: '8104'
+                    ]
+
+                    env.DEPLOY_PORT = ports[params.ENVIRONMENT]
+                    env.CONTAINER_NAME = "critics-frame-${params.ENVIRONMENT.toLowerCase()}"
+                    env.IMAGE_NAME = "critics-frame:${params.CI_BUILD_NUMBER}"
+                    env.ARTIFACT_NAME = "critics-frame-${params.CI_BUILD_NUMBER}.tar.gz"
+
+                    echo "Selected CI build: ${params.CI_BUILD_NUMBER}"
+                    echo "Target environment: ${params.ENVIRONMENT}"
+                    echo "Deployment port: ${env.DEPLOY_PORT}"
+                }
+            }
+        }
+
+        stage('Retrieve Artifact') {
+            steps {
+                deleteDir()
+
+                copyArtifacts(
+                    projectName: 'Critics-Frame-CI/main',
+                    selector: specific("${params.CI_BUILD_NUMBER}"),
+                    filter: "${env.ARTIFACT_NAME}",
+                    fingerprintArtifacts: true
+                )
+
+                sh 'test -f "$ARTIFACT_NAME"'
+            }
+        }
+
+        stage('Extract Artifact') {
+            steps {
+                sh '''
+                    mkdir -p deployment
+                    tar -xzf "$ARTIFACT_NAME" -C deployment
+
+                    test -f deployment/Dockerfile
+                    test -f deployment/.next/standalone/server.js
+
+                    echo "Artifact extracted successfully."
+                '''
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh '''
+                    docker build -t "$IMAGE_NAME" deployment
+                '''
+            }
+        }
+
+        stage('Deploy Container') {
+            steps {
+                withCredentials([
+                    string(
+                        credentialsId: 'sqe-final-database-url',
+                        variable: 'DATABASE_URL'
+                    ),
+                    string(
+                        credentialsId: 'sqe-final-tmdb-token',
+                        variable: 'TMDB_READ_TOKEN'
+                    )
+                ]) {
+                    sh '''
+                        set +x
+
+                        if docker container inspect "$CONTAINER_NAME" >/dev/null 2>&1; then
+                            docker rm -f "$CONTAINER_NAME"
+                        fi
+
+                        docker run -d \
+                            --name "$CONTAINER_NAME" \
+                            --restart unless-stopped \
+                            -p "127.0.0.1:$DEPLOY_PORT:3000" \
+                            -e DATABASE_URL \
+                            -e TMDB_READ_TOKEN \
+                            "$IMAGE_NAME"
+                    '''
+                }
+            }
+        }
+
+        stage('Verify Deployment') {
+            steps {
+                sh '''
+                    sleep 5
+
+                    test "$(docker inspect -f '{{.State.Running}}' "$CONTAINER_NAME")" = "true"
+
+                    docker exec "$CONTAINER_NAME" node -e "fetch('http://127.0.0.1:3000/login').then(r => { if (!r.ok) process.exit(1); console.log('HTTP status:', r.status); }).catch(() => process.exit(1))"
+
+                    docker ps --filter "name=$CONTAINER_NAME"
+                '''
+
+                echo "Deployed CI build: ${params.CI_BUILD_NUMBER}"
+                echo "Environment: ${params.ENVIRONMENT}"
+                echo "Application URL: http://localhost:${env.DEPLOY_PORT}"
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'CD pipeline completed successfully.'
+        }
+
+        failure {
+            echo 'CD pipeline failed. Check the console output.'
+        }
+    }
+}
