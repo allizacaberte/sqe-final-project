@@ -29,5 +29,10 @@
     "prisma": "^7.10.1",
     "tailwindcss": "4.3.3",
     "typescript": "^5"
+  },
+  "overrides": {
+  "@prisma/config": {
+    "effect": "3.22.1"
+    }
   }
 }
