@@ -1,0 +1,1029 @@
+@import "tailwindcss";
+
+:root {
+  --wine: #3a060a;
+  --wine-dark: #260604;
+  --wine-black: #1b0504;
+  --red: #660e13;
+  --beige: #f3dfbd;
+  --cream: #fff6de;
+  --gold: #f3c73f;
+  --muted: #c9ad93;
+  --content: 1180px;
+  --nav-height: 78px;
+  --font-serif: Georgia, "Times New Roman", serif;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--wine);
+  color: var(--cream);
+  font-family: var(--font-serif);
+}
+button, input, textarea { font: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+button { cursor: pointer; }
+a { color: inherit; text-decoration: none; }
+img { max-width: 100%; display: block; }
+.site-shell { min-height: 100vh; display: flex; flex-direction: column; }
+main { flex: 1; }
+.container { width: min(calc(100% - 96px), var(--content)); margin-inline: auto; }
+
+.navbar {
+  height: var(--nav-height);
+  background: transparent;
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 40;
+}
+
+.navbar-solid {
+  background: transparent;
+  backdrop-filter: none;
+}
+
+.navbar-container {
+  width: min(calc(100% - 96px), 1180px);
+  height: 100%;
+  margin-inline: auto;
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr) auto; /* logo | search (shrinks if needed) | links */
+  align-items: center;
+  gap: 24px;
+}
+/* Groups the nav links + login/signup buttons so they move as one unit */
+.navbar-right { justify-self: end; display: flex; align-items: center; gap: 24px; }
+.navbar-brand { width: 112px; }
+.navbar-brand-image, .footer-logo { width: 112px; height: auto; }
+.navbar-search {
+  justify-self: start;
+  width: min(500px, 100%); /* never wider than its column, so it can't cover the links */
+  height: 38px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(255,255,255,.07);
+  background: #100b0b;
+  color: #d5c9ba;
+  border-radius: 6px;
+  padding: 0 12px;
+}
+.navbar-search input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--cream);
+  font-size: 14px;
+}
+.navbar-search input::placeholder { color: #a99d91; }
+.navbar-search-button {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+}
+.navbar-search-button:hover { color: var(--gold); }
+
+/* Search box wrapper: holds the input + the autocomplete dropdown */
+.search-box {
+  position: relative;
+  justify-self: start;
+  width: min(500px, 100%);
+}
+.search-box .navbar-search { width: 100%; }
+
+/* Autocomplete dropdown */
+.search-suggestions {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 50;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  border: 1px solid #5a1a1d;
+  border-radius: 8px;
+  background: #160707;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, .55);
+}
+.search-suggestions a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  color: var(--cream);
+  font-size: 14px;
+}
+.search-suggestions li.is-active a { background: rgba(154, 13, 20, .45); }
+.search-suggestion-poster {
+  position: relative;
+  flex: 0 0 32px;
+  height: 48px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #2a0c0c;
+}
+.search-suggestion-poster img { object-fit: cover; }
+.search-suggestion-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.search-suggestion-year { color: #a99d91; font-size: 13px; }
+.search-suggestions-all {
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid #3a1214;
+}
+.search-suggestions-all a { color: var(--gold); justify-content: center; }
+.search-suggestions-all a:hover { background: rgba(154, 13, 20, .3); }
+.navbar-links, .navbar-actions { display: flex; align-items: center; gap: 28px; }
+.navbar-link { color: var(--beige); font-size: 16px; transition: color .2s; }
+.navbar-link:hover { color: var(--gold); }
+.navbar-actions { gap: 18px; }
+.navbar-menu-button, .navbar-mobile { display: none; }
+
+.btn-primary {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 42px;
+  border: 0;
+  border-radius: 7px;
+  padding: 10px 22px;
+  background: #760b11;
+  color: var(--cream);
+  font-size: 15px;
+  transition: transform .2s, background .2s;
+}
+.btn-primary:hover { background: #9a1018; transform: translateY(-1px); }
+.btn-small { min-height: 34px; padding: 7px 16px; font-size: 13px; }
+
+.hero-section {
+  height: 100vh;
+  min-height: 680px;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: #220a09;
+}
+.hero-background {
+  object-fit: cover;
+  object-position: center top;
+  z-index: 0;
+}
+.hero-shade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(180deg, rgba(19,3,3,.55) 0, rgba(70,8,9,.2) 55%, var(--wine) 100%);
+}
+.hero-section h1 {
+  position: absolute;
+  left: 50%;
+  top: 26%;
+  transform: translateX(-50%);
+  z-index: 2;
+  width: max-content;
+  max-width: calc(100% - 48px);
+  margin: 0;
+  color: #a88471;
+  font-size: clamp(28px, 3vw, 38px);
+  font-weight: 400;
+  letter-spacing: .2px;
+  text-shadow: 0 2px 8px rgba(0,0,0,.5);
+}
+
+.landing-section {
+  width: min(calc(100% - 96px), 1040px);
+  margin-inline: auto;
+  padding: 56px 0 24px;
+}
+.landing-section:last-of-type {
+  padding-bottom: 120px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 28px;
+  color: var(--cream);
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1;
+}
+.section-icon {
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: var(--gold);
+}
+.section-icon.popcorn {
+  background: transparent;
+  color: var(--gold);
+  transform: none;
+}
+
+.featured-movie {
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  gap: 36px;
+  align-items: stretch;
+}
+.featured-movie-poster {
+  position: relative;
+  width: 420px;
+  height: 465px;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #240505;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+}
+.featured-movie-image {
+  object-fit: cover;
+}
+.featured-movie-info {
+  display: flex;
+  flex-direction: column;
+  padding-top: 6px;
+}
+.featured-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1.5px solid #8c2323;
+}
+.featured-movie-info h3 {
+  margin: 0;
+  color: var(--cream);
+  font-size: clamp(48px, 5vw, 66px);
+  font-weight: 700;
+  line-height: 0.95;
+}
+.featured-movie-meta {
+  margin: 0;
+  color: #e6d8c5;
+  font-size: 18px;
+}
+.featured-movie-meta span {
+  padding: 0 6px;
+  color: #c88a72;
+}
+.featured-movie-info h4 {
+  margin: 20px 0 10px;
+  color: var(--cream);
+  font-size: 24px;
+  font-weight: 700;
+}
+.featured-movie-synopsis {
+  max-width: 100%;
+  margin: 0;
+  color: #e6d8c5;
+  font-size: 19px;
+  line-height: 1.48;
+}
+.featured-movie-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 100%;
+  margin-top: auto;
+  padding-top: 28px;
+}
+.featured-movie-rating {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  color: var(--gold);
+}
+.featured-movie-rating svg {
+  width: 54px;
+  height: 54px;
+}
+.featured-movie-rating span {
+  display: flex;
+  flex-direction: column;
+  color: var(--cream);
+  font-size: 38px;
+  line-height: 0.95;
+}
+.featured-movie-rating small {
+  color: #dfd1ba;
+  font-size: 13px;
+  margin: 0 0 4px 2px;
+}
+.featured-movie-bottom .btn-primary {
+  min-height: 48px;
+  padding: 12px 28px;
+  border-radius: 10px;
+  background: #8a0d14;
+  font-size: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+}
+.featured-movie-bottom .btn-primary:hover {
+  background: #a51119;
+}
+
+.top-picks-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 44px;
+  margin-top: 28px;
+}
+.movie-card {
+  min-width: 0;
+  background: #140808;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.45);
+  display: flex;
+  flex-direction: column;
+}
+.movie-card-poster {
+  position: relative;
+  width: 100%;
+  height: 410px;
+  overflow: hidden;
+  border-radius: 0;
+  background: #220505;
+}
+.movie-card-image {
+  object-fit: cover;
+  transition: transform .35s ease;
+}
+.movie-card:hover .movie-card-image {
+  transform: scale(1.025);
+}
+.movie-card-content {
+  padding: 16px 18px 20px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.movie-card-rating {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 6px;
+  color: var(--gold);
+}
+.movie-card-rating svg {
+  width: 22px;
+  height: 22px;
+}
+.movie-card-rating span {
+  color: var(--cream);
+  font-size: 21px;
+  line-height: 1;
+}
+.movie-card-content h3 {
+  margin: 2px 0 14px;
+  color: var(--cream);
+  font-size: 28px;
+  font-weight: 400;
+  line-height: 1.15;
+}
+.movie-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-top: auto;
+}
+.movie-card-meta {
+  margin: 0;
+  color: #dfd2bf;
+  font-size: 13px;
+}
+.movie-card-meta span {
+  color: #cc9a76;
+}
+.movie-card-footer .btn-primary,
+.movie-card-footer .btn-small {
+  min-height: 36px;
+  padding: 8px 18px;
+  border-radius: 8px;
+  background: #9a0d14;
+  color: var(--cream);
+  font-size: 14px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
+}
+.movie-card-footer .btn-primary:hover,
+.movie-card-footer .btn-small:hover {
+  background: #b81119;
+}
+
+.footer {
+  height: 110px;
+  background: transparent;
+  border-top: 1px solid #8c171b; /* Thin crimson top line from Figma */
+  margin-top: auto;
+}
+
+.footer-inner {
+  width: min(calc(100% - 96px), 1040px); /* Aligns edges with your landing sections */
+  height: 100%;
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  position: relative;
+  color: #e6d5b8;
+  font-size: 13px;
+}
+
+.footer-logo {
+  width: 112px;
+  height: auto;
+}
+
+.footer-divider {
+  width: 1px;
+  height: 54px;
+  background: #b5a16a;
+}
+
+.back-to-top {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%); /* Vertically centers the button in the footer */
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #f6c445 0%, #f5dfa1 100%);
+  color: #240806;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.back-to-top:hover {
+  transform: translateY(calc(-50% - 2px));
+  filter: brightness(1.05);
+}
+
+.auth-page {
+  position: relative;
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 540px; /* Wider right panel (was 420px) */
+  background: #410608;
+}
+
+.auth-page .navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 40; /* Keeps navbar visible over both the theater image and the dark panel */
+}
+
+/* On login/register, stretch the navbar to the screen edge and make its last
+   column exactly as wide as the maroon panel (540px), so
+   Home / Login / Sign Up sit centered above the form. */
+@media (min-width: 901px) {
+  .auth-page .navbar-container {
+    width: auto;
+    margin-inline: 64px 0;
+    grid-template-columns: 150px 1fr 540px;
+  }
+  .auth-page .navbar-right { justify-self: center; }
+}
+
+.auth-visual {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  background: #210707;
+}
+
+.auth-visual-image {
+  object-fit: cover;
+}
+
+.auth-visual-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(31,5,4,.05), rgba(64,5,7,.72));
+}
+
+.auth-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  padding: calc(var(--nav-height) + 28px) 64px 48px; /* Clears the top navbar + wider side padding */
+  background: rgba(34, 5, 5, .96);
+}
+.auth-brand { align-self: center; width: 140px; margin-bottom: 42px; }
+.auth-panel h1 { margin: 0 0 8px; font-size: 38px; color: var(--beige); }
+.auth-panel > p { margin: 0 0 28px; color: #cbb69f; }
+.auth-form { display: flex; flex-direction: column; gap: 16px; }
+.auth-form label { color: var(--beige); font-size: 14px; }
+.auth-form input {
+  width: 100%;
+  height: 46px;
+  margin-top: 7px;
+  border: 1px solid #753135;
+  border-radius: 5px;
+  outline: 0;
+  background: #160707;
+  color: var(--cream);
+  padding: 0 14px;
+}
+.auth-form input:focus { border-color: var(--gold); }
+.auth-submit { width: 100%; height: 48px; margin-top: 8px; }
+.auth-submit:disabled { opacity: .7; cursor: wait; transform: none; }
+.auth-error {
+  margin: 0;
+  padding: 10px 14px;
+  border: 1px solid #a3262d;
+  border-radius: 5px;
+  background: rgba(163, 38, 45, .18);
+  color: #ffb4b4;
+  font-size: 14px;
+}
+.auth-switch { margin-top: 20px; text-align: center; color: #cbb69f; font-size: 14px; }
+.auth-switch a { color: var(--gold); text-decoration: underline; }
+
+.journal-page {
+  min-height: calc(100vh - 110px);
+  padding: calc(var(--nav-height) + 42px) 0 90px;
+  background: var(--wine);
+}
+
+.journal-page .navbar {
+  position: absolute;
+}
+
+.journal-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 36px;
+}
+
+.journal-header h1 {
+  margin: 0;
+  color: var(--cream);
+  font-size: 32px;
+  font-weight: 700;
+}
+
+/* Centered list of dark cards matching Figma */
+.journal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  max-width: 780px;
+  margin-inline: auto;
+}
+
+.journal-entry {
+  display: grid;
+  grid-template-columns: 145px 1fr;
+  gap: 26px;
+  padding: 24px 28px;
+  background: #1a0404;
+  border: 0;
+  border-radius: 16px;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.4);
+}
+
+.journal-entry-poster {
+  position: relative;
+  width: 145px;
+  height: 205px;
+  border-radius: 6px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.journal-entry-poster img {
+  object-fit: cover;
+}
+
+.journal-entry-body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.journal-entry-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 10px;
+}
+
+.journal-entry h2 {
+  margin: 0;
+  color: var(--cream);
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.journal-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--cream);
+  font-size: 24px;
+  white-space: nowrap;
+}
+
+.journal-rating svg {
+  color: var(--gold);
+  width: 28px;
+  height: 28px;
+}
+
+.journal-entry p {
+  margin: 0;
+  color: #dfd2bf;
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.journal-entry-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: auto;
+  padding-top: 18px;
+}
+
+.journal-edit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 7px 28px;
+  border-radius: 999px;
+  background: #9a0d14;
+  color: var(--cream);
+  font-size: 14px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
+  transition: background 0.2s, transform 0.2s;
+}
+
+.journal-edit:hover {
+  background: #b81119;
+  transform: translateY(-1px);
+}
+
+.review-page {
+  min-height: calc(100vh - 110px);
+  padding: calc(var(--nav-height) + 42px) 0 90px;
+  background: var(--wine); /* Uses your main wine background instead of hardcoded #4a080b */
+}
+
+.review-page .navbar {
+  position: fixed;
+}
+
+.review-container {
+  width: min(calc(100% - 96px), 1040px);
+  margin-inline: auto;
+}
+
+.review-layout {
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  gap: 36px;
+  align-items: stretch;
+}
+
+.review-poster {
+  position: relative;
+  width: 420px;
+  height: 475px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+}
+
+.review-poster img {
+  object-fit: cover;
+}
+
+.review-details {
+  display: flex;
+  flex-direction: column;
+  padding-top: 6px;
+}
+
+.review-title {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1.5px solid #8c2323; /* Horizontal line under title from Figma */
+}
+
+.review-title h1 {
+  margin: 0;
+  color: var(--cream);
+  font-size: clamp(48px, 5vw, 66px);
+  font-weight: 700;
+  line-height: 0.95;
+}
+
+.review-details h2 {
+  margin: 20px 0 12px;
+  color: var(--cream);
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.review-details textarea {
+  width: 100%;
+  min-height: 210px;
+  flex: 1;
+  resize: vertical;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  outline: 0;
+  background: transparent; /* Transparent background so it matches Figma */
+  color: #e6d8c5;
+  font-size: 19px;
+  line-height: 1.5;
+  padding: 4px 0;
+  transition: border-color 0.2s, background 0.2s, padding 0.2s;
+}
+
+/* Subtle highlight only when the user clicks in to type */
+.review-details textarea:focus {
+  background: rgba(0, 0, 0, 0.18);
+  border-color: rgba(243, 199, 63, 0.35);
+  padding: 12px 14px;
+}
+
+.review-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 24px;
+}
+
+.review-actions .btn-primary {
+  min-height: 48px;
+  padding: 12px 36px;
+  border-radius: 10px;
+  background: #8a0d14;
+  font-size: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+}
+
+.review-actions .btn-primary:hover {
+  background: #a51119;
+}
+.review-actions .btn-primary:disabled { opacity: .7; cursor: wait; }
+
+/* Movie titles that link to the movie page keep the heading's look */
+.movie-card-content h3 a,
+.featured-title-row h3 a,
+.journal-entry h2 a { color: inherit; }
+.movie-card-content h3 a:hover,
+.featured-title-row h3 a:hover,
+.journal-entry h2 a:hover { color: var(--gold); }
+
+/* Review form (write / edit page) */
+.review-form { display: flex; flex-direction: column; flex: 1; gap: 12px; }
+.review-rating-select {
+  border: 0;
+  background: transparent;
+  color: var(--cream);
+  font: inherit;
+  cursor: pointer;
+}
+.review-rating-select option { background: #210707; font-size: 16px; }
+
+/* Public movie page: list of everyone's reviews */
+.movie-reviews { margin-top: 56px; display: flex; flex-direction: column; gap: 16px; }
+.movie-reviews h2 { margin: 0 0 8px; color: var(--cream); font-size: 28px; }
+.movie-reviews-empty { margin: 0; color: #cbb69f; }
+.movie-review {
+  padding: 20px 24px;
+  border: 1px solid #5a1a1d;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, .25);
+}
+.movie-review header { display: flex; justify-content: space-between; align-items: center; color: var(--cream); }
+.movie-review-rating { display: inline-flex; align-items: center; gap: 6px; color: var(--gold); }
+.movie-review p { margin: 10px 0; color: #e6d8c5; line-height: 1.55; white-space: pre-line; }
+.movie-review time { color: #a99d91; font-size: 13px; }
+
+/* Dashboard: delete button + empty state */
+.journal-entry-footer { gap: 12px; }
+.journal-delete {
+  min-height: 36px;
+  padding: 7px 22px;
+  border: 1px solid #9a0d14;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--cream);
+  font-size: 14px;
+}
+.journal-delete:hover { background: rgba(154, 13, 20, .3); }
+.journal-empty { margin: 0; color: #cbb69f; }
+.journal-empty a { color: var(--gold); text-decoration: underline; }
+
+/* Search results page */
+.search-page {
+  min-height: calc(100vh - 110px);
+  padding: calc(var(--nav-height) + 42px) 0 90px;
+  background: var(--wine);
+}
+.search-heading { margin: 0 0 8px; color: var(--cream); font-size: 32px; }
+.search-heading span { color: var(--gold); }
+.search-empty { color: #cbb69f; }
+
+/* TMDB credit in the footer (required by TMDB's terms) */
+.footer-credit { color: #a99d91; font-size: 12px; }
+.footer-credit a { color: var(--gold); text-decoration: underline; }
+
+/* "(3 reviews)" next to a card's star rating */
+.movie-card-count { color: #a99d91; font-size: 13px; }
+
+/* ---------- Home page sections ---------- */
+.section-subtitle { margin: -16px 0 24px; color: #cbb69f; font-size: 15px; }
+.section-empty { margin: 0; color: #cbb69f; }
+.section-empty a { color: var(--gold); text-decoration: underline; }
+
+/* Horizontal scrolling row of smaller movie cards */
+.movie-rail {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 210px;
+  gap: 20px;
+  overflow-x: auto;
+  padding: 4px 2px 16px;
+  scroll-snap-type: x mandatory;
+  scrollbar-color: #5a1a1d transparent;
+}
+.movie-rail-item { display: flex; scroll-snap-align: start; }
+.movie-rail .movie-card { width: 100%; }
+.movie-rail .movie-card-poster { height: 300px; }
+.movie-rail .movie-card-content { padding: 12px 14px 14px; }
+.movie-rail .movie-card-rating span { font-size: 16px; }
+.movie-rail .movie-card-rating svg { width: 18px; height: 18px; }
+.movie-rail .movie-card-content h3 { margin: 2px 0 10px; font-size: 18px; }
+.movie-rail .movie-card-footer { flex-direction: column; align-items: flex-start; }
+.movie-rail .movie-card-footer .btn-primary { min-height: 32px; padding: 6px 14px; font-size: 13px; }
+
+/* Latest Reviews feed */
+.review-feed { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.review-feed-item {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid #5a1a1d;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, .25);
+}
+.review-feed-poster {
+  position: relative;
+  flex: 0 0 72px;
+  height: 108px;
+  overflow: hidden;
+  border-radius: 6px;
+  background: #220505;
+}
+.review-feed-poster img { object-fit: cover; }
+.review-feed-body { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.review-feed-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.review-feed-title { color: var(--cream); font-size: 18px; }
+.review-feed-title span { color: #a99d91; font-size: 14px; }
+.review-feed-title:hover { color: var(--gold); }
+.review-feed-text {
+  display: -webkit-box;
+  margin: 8px 0;
+  overflow: hidden;
+  color: #e6d8c5;
+  line-height: 1.5;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+.review-feed-meta { margin: auto 0 0; color: #a99d91; font-size: 13px; }
+
+/* Genre buttons */
+.genre-chips { display: flex; flex-wrap: wrap; gap: 10px; }
+.genre-chip {
+  padding: 7px 16px;
+  border: 1px solid #7a2a2e;
+  border-radius: 999px;
+  color: var(--cream);
+  font-size: 14px;
+  transition: background .2s, border-color .2s;
+}
+.genre-chip:hover { border-color: var(--gold); background: rgba(154, 13, 20, .3); }
+.genre-chip.is-active { border-color: var(--gold); background: #9a0d14; }
+.search-page .genre-chips { margin: 20px 0 8px; }
+.genre-grid { margin-top: 32px; }
+
+/* Featured movie genres line */
+.featured-movie-genres { margin: 10px 0 0; color: #cc9a76; font-size: 14px; }
+
+/* Movie page facts: release date, director, genres */
+.movie-facts { display: flex; flex-direction: column; gap: 14px; margin: 20px 0 0; }
+.movie-facts div { display: grid; grid-template-columns: 120px 1fr; align-items: start; gap: 12px; }
+.movie-facts dt { padding-top: 2px; color: #a99d91; font-size: 14px; }
+.movie-facts dd { margin: 0; color: var(--cream); font-size: 17px; }
+.movie-facts .genre-chip { padding: 4px 12px; font-size: 13px; }
+
+@media (max-width: 900px) {
+  .container,
+  .landing-section { width: min(calc(100% - 40px), var(--content)); }
+  .navbar-container { width: calc(100% - 40px); grid-template-columns: 112px 1fr auto; }
+  .navbar-search-desktop { display: none; }
+  .navbar-right { display: none; }
+  .navbar-menu-button { display: grid; place-items: center; background: transparent; border: 0; color: var(--beige); }
+  .navbar-mobile {
+    position: absolute;
+    top: var(--nav-height);
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 20px;
+    background: #260604;
+  }
+  .navbar-mobile-logout {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+  }
+  /* The desktop search is hidden on small screens; this one lives in the menu */
+  .navbar-mobile .navbar-mobile-search { width: 100%; }
+  .hero-section { height: 85vh; min-height: 520px; }
+  .featured-movie { grid-template-columns: 280px 1fr; }
+  .featured-movie-poster { width: 280px; height: 350px; }
+  .top-picks-grid { gap: 20px; }
+  .movie-card-poster { height: 320px; }
+  .auth-page { grid-template-columns: 1fr 440px; }
+  .auth-panel { padding: calc(var(--nav-height) + 20px) 36px 36px; }
+  .review-layout { grid-template-columns: 320px 1fr; }
+  .review-poster { height: 440px; }
+}
+
+@media (max-width: 680px) {
+  .navbar { height: 68px; }
+  .navbar-container { width: calc(100% - 32px); }
+  .hero-section { height: 75vh; min-height: 460px; }
+  .hero-section h1 { top: 24%; text-align: center; }
+  .landing-section { width: calc(100% - 32px); padding-top: 34px; }
+  .landing-section:last-of-type { padding-bottom: 70px; }
+  .featured-movie { grid-template-columns: 1fr; }
+  .featured-movie-poster { width: 250px; height: 340px; margin-inline: auto; }
+  .featured-title-row { display: block; }
+  .featured-movie-info h3 { font-size: 44px; }
+  .featured-movie-meta { margin-top: 10px; }
+  .featured-movie-bottom { margin-top: 30px; }
+  .top-picks-grid { grid-template-columns: 1fr; gap: 34px; }
+  .movie-card-poster { height: 420px; }
+  .movie-rail { grid-auto-columns: 170px; gap: 14px; }
+  .movie-rail .movie-card-poster { height: 250px; }
+  .review-feed { grid-template-columns: 1fr; }
+  .movie-facts div { grid-template-columns: 1fr; gap: 4px; }
+  .footer { height: 90px; }
+  .footer-inner { width: calc(100% - 32px); }
+  .footer-divider { height: 48px; }
+  .back-to-top { bottom: 20px; }
+  .auth-page { display: block; background: #240604; }
+  .auth-visual { display: none; }
+  .auth-panel { min-height: 100vh; padding: 32px 24px; }
+  .journal-page { padding-top: 100px; }
+  .journal-entry { grid-template-columns: 90px 1fr; }
+  .journal-entry-poster { width: 90px; height: 130px; }
+  .journal-rating { grid-column: 2; }
+  .journal-edit { grid-column: 2; }
+  .review-page { padding-top: 100px; }
+  .review-layout { grid-template-columns: 1fr; }
+  .review-poster { width: 280px; height: 390px; margin-inline: auto; }
+  .review-title h1 { font-size: 40px; }
+}

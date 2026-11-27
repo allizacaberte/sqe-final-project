@@ -1,6 +1,22 @@
-node_modules
+# Dependencies
+**/node_modules
+
+# Git
 .git
+
+# Generated files
 coverage
+dist
+out
+.next/cache
+
+# Logs
 *.log
+*.log.*
+
+# Environment variables and secrets
 .env
 .env.*
+**/.env
+**/.env.*
+**/*.pem
