@@ -44,15 +44,27 @@ pipeline {
 
         stage('SonarQube Analysis and Quality Gate') {
             when {
-                branch 'main'
+                anyOf {
+                    branch 'main'
+                    branch 'feature/sonar-failure-demo'
+                }
             }
 
             steps {
                 script {
                     def scannerHome = tool 'SonarScanner'
 
-                    withSonarQubeEnv('SonarQube-Final') {
-                        sh "${scannerHome}/bin/sonar-scanner"
+                    if (env.BRANCH_NAME == 'feature/sonar-failure-demo') {
+                        withSonarQubeEnv(
+                            installationName: 'SonarQube-Final',
+                            credentialsId: 'sqe-sonar-failure-demo-token'
+                        ) {
+                            sh "${scannerHome}/bin/sonar-scanner"
+                        }
+                    } else {
+                        withSonarQubeEnv('SonarQube-Final') {
+                            sh "${scannerHome}/bin/sonar-scanner"
+                        }
                     }
                 }
             }
