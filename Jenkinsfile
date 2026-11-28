@@ -75,6 +75,7 @@ pipeline {
                 anyOf {
                     branch 'develop'
                     branch 'main'
+                    branch 'feature/sonar-failure-demo'
                 }
             }
 
@@ -85,7 +86,10 @@ pipeline {
 
         stage('Archive Artifact') {
             when {
-                branch 'main'
+                anyOf {
+                    branch 'main'
+                    branch 'feature/sonar-failure-demo'
+                }
             }
 
             steps {
